@@ -1,0 +1,40 @@
+name: transposer_app
+description: "A new Flutter project."
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations: # ✅ Necesario para i18n
+    sdk: flutter
+  pdf: ^3.10.4
+  printing: ^5.11.0
+  share_plus: ^7.2.1
+  google_fonts: ^6.1.0
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+
+  fonts:
+    - family: Urbanist
+      fonts:
+        - asset: assets/fonts/Urbanist-VariableFont_wght.ttf
+        - asset: assets/fonts/Urbanist-Italic-VariableFont_wght.ttf
+          style: italic
+
+  assets:
+    - assets/images/logo.png
+    - assets/images/SplashScreen.png
+
+  generate: true
