@@ -1,50 +1,50 @@
 {
   "@@locale": "es",
   "app_title": "Transpose-it",
-  "button_transpose_by_tone": "Transposición por tono/semitono",
-  "button_transpose_between_instruments": "Transposición entre instrumentos",
+  "button_transpose_by_tone": "Transposici\u00f3n por tono/semitono",
+  "button_transpose_between_instruments": "Transposici\u00f3n entre instrumentos",
   "button_digitalize_notes": "Digitalizar mis notas",
-  "notation_type_label": "Tipo de notación",
-  "latina_option": "Latina(Do,Re)",
-  "american_option": "Americana(C,D)",
+  "notation_type_label": "Tipo de notaci\u00f3n",
+  "latina_option": "Latina (Do, Re)",
+  "american_option": "Americana (C, D)",
   "accidental_preference_label": "Preferencia de alteraciones",
-  "sharp_option": "♯ Sostenidos",
-  "flat_option": "♭ Bemoles",
+  "sharp_option": "\u266f Sostenidos",
+  "flat_option": "\u266d Bemoles",
   "chord_complexity_label": "Complejidad de acordes:",
   "complexity_simple": "Notas",
   "complexity_chords": "Acordes",
   "complexity_advanced": "Avanzado",
   "semitones_label": "Semitonos:",
   "current_sequence_label": "Secuencia actual:",
-  "empty_sequence_placeholder": "(vacío)",
-  "newline_button": "Salto de línea",
+  "empty_sequence_placeholder": "(vac\u00edo)",
+  "newline_button": "Salto de l\u00ednea",
   "transpose_button": "Transponer secuencia",
-  "clear_last_button": "Borrar último",
+  "clear_last_button": "Borrar \u00faltimo",
   "reset_button": "Reiniciar",
   "transposed_result_label": "Resultado transpuesto:",
   "copy_button": "Copiar",
   "export_button": "Exportar",
   "export_pdf_option": "Exportar como PDF",
   "export_image_option": "Exportar como imagen",
-  "copied_snackbar": "Resultado copiado al portapapeles",
-  "export_pdf_title": "Transposición por tono/semitono",
-  "note_sequence_pdf_title": "Transposición entre instrumentos",
+  "copied_snackbar": "Copiado al portapapeles",
+  "export_pdf_title": "Transposici\u00f3n por tono/semitono",
+  "note_sequence_pdf_title": "Transposici\u00f3n entre instrumentos",
   "delete_button": "Borrar",
   "reset_sequence_button": "Reiniciar secuencia",
   "export_error_snackbar": "Error al exportar imagen: {error}",
+  "@export_error_snackbar": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "select_note_title": "Selecciona una nota",
   "result_dialog_title": "Resultado",
   "ok_button": "OK",
-  "note_transposition_format": "{original} → {transposed}",
+  "note_transposition_format": "{original} \u2192 {transposed}",
   "@note_transposition_format": {
-    "description": "Formato para mostrar una nota transpuesta",
     "placeholders": {
-      "original": {
-        "type": "String"
-      },
-      "transposed": {
-        "type": "String"
-      }
+      "original": { "type": "String" },
+      "transposed": { "type": "String" }
     }
   },
   "digitized_notes_label": "Notas digitalizadas:",
@@ -55,21 +55,55 @@
   "target_instrument_label": "Instrumento de destino",
   "notation_input_label": "Entrada",
   "notation_output_label": "Salida",
-  "quick_mode_button": "Modo rápido",
+  "quick_mode_button": "Modo r\u00e1pido",
   "sequence_mode_button": "Ingresar secuencia",
   "piano": "Piano (C/Do)",
-  "trumpet": "Trompeta (B♭/Sib)",
-  "alto_sax": "Saxofón Alto (E♭/Mib)",
-  "tenor_sax": "Saxofón Tenor (B♭/Sib)",
-  "clarinet_bb": "Clarinete (B♭/Sib)",
-  "french_horn": "Corno francés (F/Fa)",
+  "trumpet": "Trompeta (B\u266d/Sib)",
+  "alto_sax": "Saxof\u00f3n Alto (E\u266d/Mib)",
+  "tenor_sax": "Saxof\u00f3n Tenor (B\u266d/Sib)",
+  "clarinet_bb": "Clarinete (B\u266d/Sib)",
+  "french_horn": "Corno franc\u00e9s (F/Fa)",
   "clarinet_a": "Clarinete (A/La)",
   "flute": "Flauta (G/Sol)",
-  "pdf_title_prompt": "Título del PDF",
-  "enter_pdf_title_hint": "Ingresa el título",
+  "pdf_title_prompt": "T\u00edtulo del PDF",
+  "enter_pdf_title_hint": "Ingresa el t\u00edtulo",
   "cancel_button": "Cancelar",
   "accept_button": "Aceptar",
   "image_export_widget_error": "Error al acceder al widget para exportar imagen",
   "image_export_error": "Error al exportar imagen",
-  "select_root_note_label": "Nota raíz para acordes complejos"
+  "select_root_note_label": "Nota ra\u00edz para acordes complejos",
+
+  "pdf_label_from": "De:",
+  "pdf_label_to": "A:",
+  "pdf_label_notation": "Notaci\u00f3n:",
+  "pdf_label_accidentals": "Alteraciones:",
+
+  "ocr_title": "Escanear Notas",
+  "ocr_instructions": "Toma una foto o selecciona una imagen de tu partitura para extraer las notas autom\u00e1ticamente.",
+  "ocr_camera": "Tomar foto",
+  "ocr_gallery": "Elegir de galer\u00eda",
+  "ocr_crop_title": "Ajustar \u00e1rea",
+  "ocr_processing": "Analizando imagen...",
+  "ocr_no_text_found": "No se detect\u00f3 texto en la imagen. Intenta con una foto m\u00e1s clara o mejor iluminaci\u00f3n.",
+  "ocr_confidence": "Confianza: {value}%",
+  "@ocr_confidence": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "ocr_blocks": "{count} bloques detectados",
+  "@ocr_blocks": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "ocr_result_label": "Texto extra\u00eddo (editable):",
+  "ocr_edit_hint": "Edita el texto reconocido aqu\u00ed...",
+  "ocr_import_button": "Importar al borrador",
+  "ocr_retry_camera": "Reintentar con c\u00e1mara",
+  "ocr_retry_gallery": "Reintentar desde galer\u00eda",
+  "ocr_new_scan_camera": "Nuevo escaneo",
+  "ocr_new_scan_gallery": "Desde galer\u00eda",
+  "ocr_banner_title": "Escanear con c\u00e1mara",
+  "ocr_banner_subtitle": "Extrae notas de una foto de tu partitura"
 }

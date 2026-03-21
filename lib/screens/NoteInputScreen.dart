@@ -1,4 +1,3 @@
-// ✅ NOTE_INPUT_SCREEN
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../widgets/custom_button.dart';
@@ -99,7 +98,7 @@ class NoteInputScreen extends StatelessWidget {
     final fromOffset = offsets[from] ?? 0;
     final toOffset = offsets[to] ?? 0;
     final diff = toOffset - fromOffset;
-    return (inputIndex + diff) % 12;
+    return ((inputIndex + diff) % 12 + 12) % 12;
   }
 
   String _getNote(int index) {

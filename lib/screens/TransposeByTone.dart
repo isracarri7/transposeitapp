@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/dialog_helpers.dart';
+import '../utils/localization_helper.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/export_helper.dart';
 
@@ -356,33 +357,3 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
   }
 }
 
-extension LocalizationHelper on AppLocalizations {
-  String getTranslation(String key) {
-    switch (key) {
-      case 'complexity_simple':
-        return complexity_simple;
-      case 'complexity_chords':
-        return complexity_chords;
-      case 'complexity_advanced':
-        return complexity_advanced;
-      case 'latina_option':
-        return latina_option;
-      case 'american_option':
-        return american_option;
-      case 'sharp_option':
-        return sharp_option;
-      case 'flat_option':
-        return flat_option;
-      case 'select_root_note_label':
-        return 'Nota raíz';
-      case 'semitones_label':
-        return semitones_label;
-      case 'current_sequence_label':
-        return current_sequence_label;
-      case 'empty_sequence_placeholder':
-        return empty_sequence_placeholder;
-      default:
-        return key;
-    }
-  }
-}
