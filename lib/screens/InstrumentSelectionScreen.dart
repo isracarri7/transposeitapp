@@ -3,13 +3,15 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'NoteInputScreen.dart';
 import 'NoteSequenceScreen.dart';
 import '../utils/localization_helper.dart';
-import '../widgets/custom_button.dart';
+import '../widgets/app_scaffold.dart';
+
 
 class InstrumentSelectionScreen extends StatefulWidget {
   const InstrumentSelectionScreen({super.key});
 
   @override
-  _InstrumentSelectionScreenState createState() => _InstrumentSelectionScreenState();
+  State<InstrumentSelectionScreen> createState() =>
+      _InstrumentSelectionScreenState();
 }
 
 class _InstrumentSelectionScreenState extends State<InstrumentSelectionScreen> {
@@ -28,116 +30,203 @@ class _InstrumentSelectionScreenState extends State<InstrumentSelectionScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      resizeToAvoidBottomInset: true,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return AppScaffold(
+      title: loc.button_transpose_between_instruments,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Origin instrument
+            buildStyledDropdown(
+              value: originInstrument!,
+              label: loc.origin_instrument_label,
+              items: instruments,
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() => originInstrument = value),
+            ),
+            const SizedBox(height: 12),
+
+            // Swap button
+            Center(
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      final temp = originInstrument;
+                      originInstrument = targetInstrument;
+                      targetInstrument = temp;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withOpacity(0.15),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFD4AF37).withOpacity(0.3),
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.swap_vert_rounded,
+                      color: Color(0xFFD4AF37),
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Target instrument
+            buildStyledDropdown(
+              value: targetInstrument!,
+              label: loc.target_instrument_label,
+              items: instruments,
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() => targetInstrument = value),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Divider
+            Divider(color: Colors.white.withOpacity(0.08)),
+            const SizedBox(height: 16),
+
+            // Notation input
+            buildSectionLabel(loc.notation_input_label),
+            buildStyledDropdown(
+              value: notationInput,
+              label: loc.notation_type_label,
+              items: ['latina_option', 'american_option'],
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() => notationInput = value!),
+            ),
+            const SizedBox(height: 12),
+
+            // Notation output
+            buildSectionLabel(loc.notation_output_label),
+            buildStyledDropdown(
+              value: notationOutput,
+              label: loc.notation_type_label,
+              items: ['latina_option', 'american_option'],
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() => notationOutput = value!),
+            ),
+            const SizedBox(height: 12),
+
+            // Accidentals
+            buildStyledDropdown(
+              value: accidentalPreference,
+              label: loc.accidental_preference_label,
+              items: ['sharp_option', 'flat_option'],
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) =>
+                  setState(() => accidentalPreference = value!),
+            ),
+
+            const SizedBox(height: 32),
+
+            // Mode buttons
+            Row(
               children: [
-                IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-                const SizedBox(height: 8),
-                DropdownButtonFormField<String>(
-                  value: originInstrument,
-                  decoration: InputDecoration(labelText: loc.origin_instrument_label),
-                  items: instruments.map((instr) => DropdownMenuItem(
-                    value: instr,
-                    child: Text(loc.getTranslation(instr)),
-                  )).toList(),
-                  onChanged: (value) => setState(() => originInstrument = value),
+                Expanded(
+                  child: _buildModeCard(
+                    icon: Icons.touch_app_rounded,
+                    label: loc.quick_mode_button,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NoteInputScreen(
+                            originInstrument: originInstrument!,
+                            targetInstrument: targetInstrument!,
+                            notationInput: notationInput,
+                            notationOutput: notationOutput,
+                            accidentalPreference: accidentalPreference,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: targetInstrument,
-                  decoration: InputDecoration(labelText: loc.target_instrument_label),
-                  items: instruments.map((instr) => DropdownMenuItem(
-                    value: instr,
-                    child: Text(loc.getTranslation(instr)),
-                  )).toList(),
-                  onChanged: (value) => setState(() => targetInstrument = value),
-                ),
-                const SizedBox(height: 16),
-                Text(loc.notation_input_label),
-                DropdownButtonFormField<String>(
-                  value: notationInput,
-                  items: ['latina_option', 'american_option'].map((key) => DropdownMenuItem(
-                    value: key,
-                    child: Text(loc.getTranslation(key)),
-                  )).toList(),
-                  onChanged: (value) => setState(() => notationInput = value!),
-                ),
-                const SizedBox(height: 16),
-                Text(loc.notation_output_label),
-                DropdownButtonFormField<String>(
-                  value: notationOutput,
-                  items: ['latina_option', 'american_option'].map((key) => DropdownMenuItem(
-                    value: key,
-                    child: Text(loc.getTranslation(key)),
-                  )).toList(),
-                  onChanged: (value) => setState(() => notationOutput = value!),
-                ),
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: accidentalPreference,
-                  decoration: InputDecoration(labelText: loc.accidental_preference_label),
-                  items: ['sharp_option', 'flat_option'].map((key) => DropdownMenuItem(
-                    value: key,
-                    child: Text(loc.getTranslation(key)),
-                  )).toList(),
-                  onChanged: (value) => setState(() => accidentalPreference = value!),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomButton(
-                        text: loc.quick_mode_button,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => NoteInputScreen(
-                                originInstrument: originInstrument!,
-                                targetInstrument: targetInstrument!,
-                                notationInput: notationInput,
-                                notationOutput: notationOutput,
-                                accidentalPreference: accidentalPreference,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomButton(
-                        text: loc.sequence_mode_button,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => NoteSequenceScreen(
-                                originInstrument: originInstrument!,
-                                targetInstrument: targetInstrument!,
-                                notationInput: notationInput,
-                                notationOutput: notationOutput,
-                                accidentalPreference: accidentalPreference,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildModeCard(
+                    icon: Icons.queue_music_rounded,
+                    label: loc.sequence_mode_button,
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => NoteSequenceScreen(
+                            originInstrument: originInstrument!,
+                            targetInstrument: targetInstrument!,
+                            notationInput: notationInput,
+                            notationOutput: notationOutput,
+                            accidentalPreference: accidentalPreference,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildModeCard({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF132035),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withOpacity(0.2),
+            ),
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFD4AF37).withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: const Color(0xFFD4AF37), size: 28),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  fontFamily: 'Urbanist',
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 }
-
