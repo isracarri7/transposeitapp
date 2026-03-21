@@ -5,7 +5,7 @@ import '../utils/dialog_helpers.dart';
 import '../utils/localization_helper.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/export_helper.dart';
-import 'OcrScreen.dart';
+import 'OcrScreen.dart' show OcrScreen, isOcrSupported;
 
 class NoteDraftScreen extends StatefulWidget {
   const NoteDraftScreen({super.key});
@@ -124,9 +124,11 @@ class _NoteDraftScreenState extends State<NoteDraftScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // OCR Banner
-                      _buildOcrBanner(loc),
-                      const SizedBox(height: 20),
+                      // OCR Banner (mobile only)
+                      if (isOcrSupported) ...[
+                        _buildOcrBanner(loc),
+                        const SizedBox(height: 20),
+                      ],
 
                       // Notation & accidental dropdowns
                       _buildDropdown(

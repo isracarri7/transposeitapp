@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,6 +8,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 
 enum OcrState { idle, ready, processing, done, error }
+
+/// Returns true if the current platform supports ML Kit OCR (Android/iOS only).
+bool get isOcrSupported =>
+    !kIsWeb && (Platform.isAndroid || Platform.isIOS);
 
 class OcrScreen extends StatefulWidget {
   final void Function(String text)? onImport;
@@ -18,10 +23,14 @@ class OcrScreen extends StatefulWidget {
 }
 
 class _OcrScreenState extends State<OcrScreen> {
-  final TextRecognizer _textRecognizer =
-      TextRecognizer(script: TextRecognitionScript.latin);
+  TextRecognizer? _textRecognizer;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _resultController = TextEditingController();
+
+  TextRecognizer _getRecognizer() {
+    _textRecognizer ??= TextRecognizer(script: TextRecognitionScript.latin);
+    return _textRecognizer!;
+  }
 
   OcrState _state = OcrState.idle;
   String? _imagePath;
@@ -31,7 +40,7 @@ class _OcrScreenState extends State<OcrScreen> {
 
   @override
   void dispose() {
-    _textRecognizer.close();
+    _textRecognizer?.close();
     _resultController.dispose();
     super.dispose();
   }
@@ -88,7 +97,7 @@ class _OcrScreenState extends State<OcrScreen> {
     try {
       final inputImage = InputImage.fromFilePath(path);
       final RecognizedText recognized =
-          await _textRecognizer.processImage(inputImage);
+          await _getRecognizer().processImage(inputImage);
 
       // Calculate average confidence and block count
       double totalConfidence = 0;
@@ -151,6 +160,60 @@ class _OcrScreenState extends State<OcrScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
+
+    // Platform guard: OCR only works on Android/iOS
+    if (!isOcrSupported) {
+      return Scaffold(
+        body: Container(
+          width: double.infinity,
+          height: double.infinity,
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF0A1628), Color(0xFF122640), Color(0xFF1A3555)],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ],
+                  ),
+                ),
+                const Expanded(
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(32),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.no_photography_outlined,
+                              size: 64, color: Colors.white38),
+                          SizedBox(height: 16),
+                          Text(
+                            'OCR is only available on Android and iOS devices.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: Container(
