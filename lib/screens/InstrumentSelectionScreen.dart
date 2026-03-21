@@ -1,8 +1,8 @@
-// ✅ INSTRUMENT_SELECTION_SCREEN
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'NoteInputScreen.dart';
 import 'NoteSequenceScreen.dart';
+import '../utils/localization_helper.dart';
 import '../widgets/custom_button.dart';
 
 class InstrumentSelectionScreen extends StatefulWidget {
@@ -141,24 +141,3 @@ class _InstrumentSelectionScreenState extends State<InstrumentSelectionScreen> {
   }
 }
 
-extension LocalizationHelper on AppLocalizations {
-  String getTranslation(String key) {
-    switch (key) {
-      case 'latina_option': return latina_option;
-      case 'american_option': return american_option;
-      case 'sharp_option': return sharp_option;
-      case 'flat_option': return flat_option;
-      case 'piano': return piano;
-      case 'trumpet': return trumpet;
-      case 'alto_sax': return alto_sax;
-      case 'tenor_sax': return tenor_sax;
-      case 'clarinet_bb': return clarinet_bb;
-      case 'french_horn': return french_horn;
-      case 'clarinet_a': return clarinet_a;
-      case 'flute': return flute;
-      default: return key;
-    }
-  }
-}
-
-// Las pantallas NoteInputScreen y NoteSequenceScreen se adaptarán en el siguiente paso

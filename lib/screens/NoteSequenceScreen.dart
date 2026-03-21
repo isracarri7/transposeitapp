@@ -1,10 +1,8 @@
-// ✅ NOTE_SEQUENCE_SCREEN
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:transposer_app/screens/InstrumentSelectionScreen.dart';
 import '../utils/dialog_helpers.dart';
+import '../utils/localization_helper.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/export_helper.dart';
 
@@ -89,10 +87,8 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
     };
     final fromOffset = offsets[widget.originInstrument] ?? 0;
     final toOffset = offsets[widget.targetInstrument] ?? 0;
-    return (toOffset - fromOffset) % 12;
+    return ((toOffset - fromOffset) % 12 + 12) % 12;
   }
-
-  void _addNote(String note) => setState(() => sequence.add(note));
 
   void _addLineBreak() {
     final current = _textController.text;
@@ -141,7 +137,6 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
-    final displaySequence = sequence.map((note) => [',', '/', '-', '(', ')', '\n'].contains(note) ? note : '$note ').join().replaceAll('\n ', '\n');
 
     return Scaffold(
       body: SafeArea(
@@ -273,6 +268,10 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
                                         accidentalPreference: loc.getTranslation(widget.accidentalPreference),
                                         content: transposedResult,
                                         filename: 'transposicion_notas.pdf',
+                                        labelFrom: loc.pdf_label_from,
+                                        labelTo: loc.pdf_label_to,
+                                        labelNotation: loc.pdf_label_notation,
+                                        labelAccidentals: loc.pdf_label_accidentals,
                                       );
                                     }
                                   },

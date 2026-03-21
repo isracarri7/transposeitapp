@@ -5,11 +5,11 @@
   "button_transpose_between_instruments": "Transpose between instruments",
   "button_digitalize_notes": "Digitalize my notes",
   "notation_type_label": "Notation type",
-  "latina_option": "Latin (Do,Re)",
-  "american_option": "American (C,D)",
+  "latina_option": "Latin (Do, Re)",
+  "american_option": "American (C, D)",
   "accidental_preference_label": "Accidental preference",
-  "sharp_option": "♯ Sharps",
-  "flat_option": "♭ Flats",
+  "sharp_option": "\u266f Sharps",
+  "flat_option": "\u266d Flats",
   "chord_complexity_label": "Chord complexity:",
   "complexity_simple": "Notes",
   "complexity_chords": "Chords",
@@ -26,25 +26,25 @@
   "export_button": "Export",
   "export_pdf_option": "Export as PDF",
   "export_image_option": "Export as image",
-  "copied_snackbar": "Result copied to clipboard",
+  "copied_snackbar": "Copied to clipboard",
   "export_pdf_title": "Tone/semitone transposition",
   "note_sequence_pdf_title": "Transposition between instruments",
   "delete_button": "Delete",
   "reset_sequence_button": "Reset sequence",
   "export_error_snackbar": "Error exporting image: {error}",
+  "@export_error_snackbar": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
   "select_note_title": "Select a note",
   "result_dialog_title": "Result",
   "ok_button": "OK",
-  "note_transposition_format": "{original} → {transposed}",
+  "note_transposition_format": "{original} \u2192 {transposed}",
   "@note_transposition_format": {
-    "description": "Format for showing transposed note",
     "placeholders": {
-      "original": {
-        "type": "String"
-      },
-      "transposed": {
-        "type": "String"
-      }
+      "original": { "type": "String" },
+      "transposed": { "type": "String" }
     }
   },
   "digitized_notes_label": "Digitized notes:",
@@ -58,10 +58,10 @@
   "quick_mode_button": "Quick mode",
   "sequence_mode_button": "Enter sequence",
   "piano": "Piano (C/Do)",
-  "trumpet": "Trumpet (B♭/Sib)",
-  "alto_sax": "Alto Saxophone (E♭/Mib)",
-  "tenor_sax": "Tenor Saxophone (B♭/Sib)",
-  "clarinet_bb": "Clarinet (B♭/Sib)",
+  "trumpet": "Trumpet (B\u266d/Sib)",
+  "alto_sax": "Alto Saxophone (E\u266d/Mib)",
+  "tenor_sax": "Tenor Saxophone (B\u266d/Sib)",
+  "clarinet_bb": "Clarinet (B\u266d/Sib)",
   "french_horn": "French Horn (F/Fa)",
   "clarinet_a": "Clarinet (A/La)",
   "flute": "Flute (G/Sol)",
@@ -71,5 +71,39 @@
   "accept_button": "Accept",
   "image_export_widget_error": "Failed to access widget for image export",
   "image_export_error": "Image export failed",
-  "select_root_note_label": "Root note for complex chords"
+  "select_root_note_label": "Root note for complex chords",
+
+  "pdf_label_from": "From:",
+  "pdf_label_to": "To:",
+  "pdf_label_notation": "Notation:",
+  "pdf_label_accidentals": "Accidentals:",
+
+  "ocr_title": "Scan Notes",
+  "ocr_instructions": "Take a photo or select an image of your sheet music to extract the notes automatically.",
+  "ocr_camera": "Take a photo",
+  "ocr_gallery": "Choose from gallery",
+  "ocr_crop_title": "Adjust area",
+  "ocr_processing": "Analyzing image...",
+  "ocr_no_text_found": "No text was detected in the image. Try with a clearer photo or better lighting.",
+  "ocr_confidence": "Confidence: {value}%",
+  "@ocr_confidence": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "ocr_blocks": "{count} blocks detected",
+  "@ocr_blocks": {
+    "placeholders": {
+      "count": { "type": "String" }
+    }
+  },
+  "ocr_result_label": "Extracted text (editable):",
+  "ocr_edit_hint": "Edit the recognized text here...",
+  "ocr_import_button": "Import to draft",
+  "ocr_retry_camera": "Retry with camera",
+  "ocr_retry_gallery": "Retry from gallery",
+  "ocr_new_scan_camera": "New scan",
+  "ocr_new_scan_gallery": "From gallery",
+  "ocr_banner_title": "Scan with camera",
+  "ocr_banner_subtitle": "Extract notes from a photo of your sheet music"
 }

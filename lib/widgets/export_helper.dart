@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -74,6 +73,10 @@ class ExportHelper {
     required String content,
     required String filename,
     required String title,
+    required String labelFrom,
+    required String labelTo,
+    required String labelNotation,
+    required String labelAccidentals,
   }) async {
     final pdf = pw.Document();
 
@@ -86,10 +89,10 @@ class ExportHelper {
             children: [
               pw.Text(title, style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold)),
               pw.SizedBox(height: 12),
-              pw.Text("De: $originInstrument", style: const pw.TextStyle(fontSize: 14)),
-              pw.Text("A: $targetInstrument", style: const pw.TextStyle(fontSize: 14)),
-              pw.Text("Notación: $notationInput → $notationOutput", style: const pw.TextStyle(fontSize: 14)),
-              pw.Text("Alteraciones: $accidentalPreference", style: const pw.TextStyle(fontSize: 14)),
+              pw.Text("$labelFrom $originInstrument", style: const pw.TextStyle(fontSize: 14)),
+              pw.Text("$labelTo $targetInstrument", style: const pw.TextStyle(fontSize: 14)),
+              pw.Text("$labelNotation $notationInput → $notationOutput", style: const pw.TextStyle(fontSize: 14)),
+              pw.Text("$labelAccidentals $accidentalPreference", style: const pw.TextStyle(fontSize: 14)),
               pw.SizedBox(height: 20),
               pw.Text(content, style: const pw.TextStyle(fontSize: 16)),
             ],
