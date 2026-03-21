@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/localization_helper.dart';
 import '../widgets/app_scaffold.dart';
@@ -44,55 +45,69 @@ class NoteInputScreen extends StatelessWidget {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: const Color(0xFF132035),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
               child: Row(
                 children: [
                   _buildInstrumentPill(loc.getTranslation(originInstrument)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Icon(Icons.arrow_forward,
-                        color: const Color(0xFFD4AF37).withOpacity(0.7),
-                        size: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.arrow_forward,
+                          color: Color(0xFFD4AF37), size: 16),
+                    ),
                   ),
                   _buildInstrumentPill(loc.getTranslation(targetInstrument)),
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // Instructions
             Text(
               loc.select_note_title,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 15,
                 fontWeight: FontWeight.w500,
-                color: Colors.white70,
+                color: Colors.white.withOpacity(0.6),
                 fontFamily: 'Urbanist',
               ),
             ),
             const SizedBox(height: 16),
 
-            // Note buttons
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: notes.map((note) {
-                return SizedBox(
-                  width: (MediaQuery.of(context).size.width - 32 - 30) / 4,
-                  child: _NoteButton(
-                    note: note,
-                    onTap: () {
-                      final index = notes.indexOf(note);
-                      final transposedIndex = _transpose(
-                          index, originInstrument, targetInstrument);
-                      final transposedNote = _getNote(transposedIndex);
-                      _showResultDialog(context, loc, note, transposedNote);
-                    },
-                  ),
+            // Note buttons — grid layout
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 1.3,
+              ),
+              itemCount: notes.length,
+              itemBuilder: (context, index) {
+                final note = notes[index];
+                final isSharpFlat = note.contains('#') || note.contains('b') && note.length > 1;
+                return _NoteButton(
+                  note: note,
+                  isAccidental: isSharpFlat,
+                  onTap: () {
+                    HapticFeedback.mediumImpact();
+                    final idx = notes.indexOf(note);
+                    final transposedIndex =
+                        _transpose(idx, originInstrument, targetInstrument);
+                    final transposedNote = _getNote(transposedIndex);
+                    _showResultDialog(context, loc, note, transposedNote);
+                  },
                 );
-              }).toList(),
+              },
             ),
 
             const SizedBox(height: 32),
@@ -107,41 +122,65 @@ class NoteInputScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF132035),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: const Color(0xFF0F1E35),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: Text(
           loc.result_dialog_title,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
             fontFamily: 'Urbanist',
+            fontSize: 18,
           ),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 _buildResultNoteChip(original, false),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Icon(Icons.arrow_forward_rounded,
-                      color: Color(0xFFD4AF37), size: 28),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFD4AF37).withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.arrow_forward_rounded,
+                        color: Color(0xFFD4AF37), size: 22),
+                  ),
                 ),
                 _buildResultNoteChip(transposed, true),
               ],
             ),
+            const SizedBox(height: 8),
           ],
         ),
+        actionsAlignment: MainAxisAlignment.center,
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text(
-              'OK',
-              style: TextStyle(
-                color: Color(0xFFD4AF37),
-                fontWeight: FontWeight.w600,
+          SizedBox(
+            width: 120,
+            child: ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFD4AF37),
+                foregroundColor: const Color(0xFF0A1628),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
+              child: const Text(
+                'OK',
+                style: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontFamily: 'Urbanist',
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
@@ -152,17 +191,27 @@ class NoteInputScreen extends StatelessWidget {
 
   Widget _buildResultNoteChip(String note, bool isPrimary) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
       decoration: BoxDecoration(
         color: isPrimary
-            ? const Color(0xFFD4AF37).withOpacity(0.15)
+            ? const Color(0xFFD4AF37).withOpacity(0.12)
             : const Color(0xFF1A2C42),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isPrimary
-              ? const Color(0xFFD4AF37).withOpacity(0.5)
-              : Colors.white.withOpacity(0.1),
+              ? const Color(0xFFD4AF37).withOpacity(0.4)
+              : Colors.white.withOpacity(0.08),
+          width: isPrimary ? 1.5 : 1,
         ),
+        boxShadow: isPrimary
+            ? [
+                BoxShadow(
+                  color: const Color(0xFFD4AF37).withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ]
+            : null,
       ),
       child: Text(
         note,
@@ -179,12 +228,12 @@ class NoteInputScreen extends StatelessWidget {
   Widget _buildInstrumentPill(String label) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         decoration: BoxDecoration(
           color: const Color(0xFF1A2C42),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withOpacity(0.15),
           ),
         ),
         child: Text(
@@ -234,9 +283,14 @@ class NoteInputScreen extends StatelessWidget {
 
 class _NoteButton extends StatelessWidget {
   final String note;
+  final bool isAccidental;
   final VoidCallback onTap;
 
-  const _NoteButton({required this.note, required this.onTap});
+  const _NoteButton({
+    required this.note,
+    required this.onTap,
+    this.isAccidental = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -244,21 +298,28 @@ class _NoteButton extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
+        splashColor: const Color(0xFFD4AF37).withOpacity(0.15),
+        highlightColor: const Color(0xFFD4AF37).withOpacity(0.08),
         child: Container(
-          height: 56,
           decoration: BoxDecoration(
-            color: const Color(0xFF1A2C42),
-            borderRadius: BorderRadius.circular(12),
+            color: isAccidental
+                ? const Color(0xFF0F1E35)
+                : const Color(0xFF1A2C42),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFD4AF37).withOpacity(0.15),
+              color: isAccidental
+                  ? const Color(0xFFD4AF37).withOpacity(0.25)
+                  : const Color(0xFFD4AF37).withOpacity(0.1),
             ),
           ),
           child: Center(
             child: Text(
               note,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: isAccidental
+                    ? const Color(0xFFD4AF37)
+                    : Colors.white,
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
                 fontFamily: 'Urbanist',

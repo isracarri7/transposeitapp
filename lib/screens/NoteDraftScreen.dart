@@ -243,8 +243,8 @@ class _NoteDraftScreenState extends State<NoteDraftScreen> {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (_) => OcrScreen(onImport: _importFromOcr),
+            SmoothPageRoute(
+              page: OcrScreen(onImport: _importFromOcr),
             ),
           );
         },

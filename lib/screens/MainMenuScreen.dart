@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../widgets/app_scaffold.dart';
 import 'NoteDraftScreen.dart';
 import 'TransposeByTone.dart';
 import 'InstrumentSelectionScreen.dart';
@@ -23,10 +25,11 @@ class MainMenuScreen extends StatelessWidget {
           // Language toggle pill
           Container(
             margin: const EdgeInsets.only(right: 16, top: 4),
+            padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.08),
+              color: Colors.white.withOpacity(0.06),
               borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.06)),
+              border: Border.all(color: Colors.white.withOpacity(0.04)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -75,12 +78,12 @@ class MainMenuScreen extends StatelessWidget {
                   ),
                   child: Image.asset(
                     'assets/images/logo.png',
-                    width: 180,
-                    height: 180,
+                    width: 170,
+                    height: 170,
                     fit: BoxFit.contain,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
                   loc.app_title,
                   style: const TextStyle(
@@ -93,7 +96,7 @@ class MainMenuScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Your music, any key',
+                  loc.tagline,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -108,33 +111,33 @@ class MainMenuScreen extends StatelessWidget {
                 _buildMenuButton(
                   icon: Icons.tune_rounded,
                   label: loc.button_transpose_by_tone,
-                  subtitle: 'Semitones & chords',
+                  subtitle: loc.menu_subtitle_tone,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const TransposeByToneScreen()),
+                    SmoothPageRoute(
+                        page: const TransposeByToneScreen()),
                   ),
                 ),
                 const SizedBox(height: 12),
                 _buildMenuButton(
                   icon: Icons.swap_horiz_rounded,
                   label: loc.button_transpose_between_instruments,
-                  subtitle: 'Piano, Sax, Trumpet...',
+                  subtitle: loc.menu_subtitle_instruments,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const InstrumentSelectionScreen()),
+                    SmoothPageRoute(
+                        page: const InstrumentSelectionScreen()),
                   ),
                 ),
                 const SizedBox(height: 12),
                 _buildMenuButton(
                   icon: Icons.edit_note_rounded,
                   label: loc.button_digitalize_notes,
-                  subtitle: 'Manual input & OCR',
+                  subtitle: loc.menu_subtitle_digitalize,
                   onTap: () => Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (_) => const NoteDraftScreen()),
+                    SmoothPageRoute(
+                        page: const NoteDraftScreen()),
                   ),
                 ),
               ],
@@ -149,9 +152,13 @@ class MainMenuScreen extends StatelessWidget {
       String label, Locale locale, Locale currentLocale) {
     final isSelected = currentLocale.languageCode == locale.languageCode;
     return GestureDetector(
-      onTap: () => onChangeLanguage(locale),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      onTap: () {
+        HapticFeedback.lightImpact();
+        onChangeLanguage(locale);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
         decoration: BoxDecoration(
           color: isSelected
               ? const Color(0xFFD4AF37)
@@ -180,22 +187,27 @@ class MainMenuScreen extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
         borderRadius: BorderRadius.circular(16),
+        splashColor: const Color(0xFFD4AF37).withOpacity(0.08),
+        highlightColor: const Color(0xFFD4AF37).withOpacity(0.04),
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 18),
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 18),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.05),
+            color: Colors.white.withOpacity(0.04),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colors.white.withOpacity(0.07),
+              color: Colors.white.withOpacity(0.06),
             ),
           ),
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
                   color: const Color(0xFFD4AF37).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(12),
@@ -216,11 +228,11 @@ class MainMenuScreen extends StatelessWidget {
                         fontFamily: 'Urbanist',
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 3),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.4),
+                        color: Colors.white.withOpacity(0.35),
                         fontSize: 12,
                         fontFamily: 'Urbanist',
                       ),
@@ -230,7 +242,7 @@ class MainMenuScreen extends StatelessWidget {
               ),
               Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withOpacity(0.15),
                 size: 16,
               ),
             ],

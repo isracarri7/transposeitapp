@@ -195,21 +195,26 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
             // Chord complexity
             buildSectionLabel(loc.chord_complexity_label),
             Container(
+              padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 color: const Color(0xFF132035),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
               child: Row(
                 children: List.generate(3, (i) {
                   final isSelected = complexityLevel == i;
                   return Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() {
-                        complexityLevel = i;
-                        if (i != 2) selectedRootNote = '';
-                      }),
-                      child: Container(
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        setState(() {
+                          complexityLevel = i;
+                          if (i != 2) selectedRootNote = '';
+                        });
+                      },
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: isSelected
@@ -223,7 +228,7 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
                           style: TextStyle(
                             color: isSelected
                                 ? const Color(0xFF0A1628)
-                                : Colors.white70,
+                                : Colors.white54,
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                             fontFamily: 'Urbanist',
@@ -252,11 +257,11 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
 
             // Semitone shift
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(
                 color: const Color(0xFF132035),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -466,13 +471,17 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
+        onTap: () {
+          HapticFeedback.lightImpact();
+          onTap();
+        },
+        borderRadius: BorderRadius.circular(12),
+        splashColor: const Color(0xFFD4AF37).withOpacity(0.15),
         child: Container(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
             color: const Color(0xFF1A2C42),
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: const Color(0xFFD4AF37).withOpacity(0.2),
             ),

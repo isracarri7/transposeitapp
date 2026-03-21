@@ -105,5 +105,20 @@
   "ocr_new_scan_camera": "New scan",
   "ocr_new_scan_gallery": "From gallery",
   "ocr_banner_title": "Scan with camera",
-  "ocr_banner_subtitle": "Extract notes from a photo of your sheet music"
+  "ocr_banner_subtitle": "Extract notes from a photo of your sheet music",
+
+  "tagline": "Your music, any key",
+  "menu_subtitle_tone": "Semitones & chords",
+  "menu_subtitle_instruments": "Piano, Sax, Trumpet...",
+  "menu_subtitle_digitalize": "Manual input & OCR",
+  "camera_permission_denied": "Camera permission denied. Please enable it in your device Settings.",
+  "source_open_error": "Could not open {source}: {message}",
+  "@source_open_error": {
+    "placeholders": {
+      "source": { "type": "String" },
+      "message": { "type": "String" }
+    }
+  },
+  "camera_source": "camera",
+  "gallery_source": "gallery"
 }
