@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/dialog_helpers.dart';
 import '../utils/localization_helper.dart';
+import '../widgets/app_scaffold.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/export_helper.dart';
 
@@ -23,11 +24,16 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
   final GlobalKey _previewContainerKey = GlobalKey();
   final TextEditingController _textController = TextEditingController();
 
-  final List<String> complexityLabels = ['complexity_simple', 'complexity_chords', 'complexity_advanced'];
+  final List<String> complexityLabels = [
+    'complexity_simple',
+    'complexity_chords',
+    'complexity_advanced',
+  ];
 
   final List<String> complexSuffixes = [
-    '','m','7', 'm7', 'maj7', 'mM7', '6', 'm6', '6/9', '5', '9', 'm9', 'maj9', '11', 'm11', 'maj11',
-    '13', 'm13', 'maj13', 'add', '7-5', '7+5', 'sus', 'dim', 'dim7', 'm7b5', 'aug', 'aug7'
+    '', 'm', '7', 'm7', 'maj7', 'mM7', '6', 'm6', '6/9', '5', '9', 'm9',
+    'maj9', '11', 'm11', 'maj11', '13', 'm13', 'maj13', 'add', '7-5', '7+5',
+    'sus', 'dim', 'dim7', 'm7b5', 'aug', 'aug7',
   ];
 
   final List<String> chromaticLatinaSharp = ['Do', 'Do#', 'Re', 'Re#', 'Mi', 'Fa', 'Fa#', 'Sol', 'Sol#', 'La', 'La#', 'Si'];
@@ -69,10 +75,6 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
     }
   }
 
-  List<String> buildRootNoteDropdownItems() {
-    return getRootNotes();
-  }
-
   List<String> getDisplayedButtons() {
     if (complexityLevel == 0) {
       return getRootNotes();
@@ -98,9 +100,8 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
     for (var note in sortedScale) {
       if (chord.startsWith(note)) {
         final originalIndex = scale.indexOf(note);
-        final newIndex = (originalIndex + semitoneShift) % 12;
-        final newNote = scale[newIndex < 0 ? newIndex + 12 : newIndex];
-        return chord.replaceFirst(note, newNote);
+        final newIndex = ((originalIndex + semitoneShift) % 12 + 12) % 12;
+        return chord.replaceFirst(note, scale[newIndex]);
       }
     }
     return chord;
@@ -108,7 +109,9 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
 
   void transposeSequence() {
     final scale = getChromaticScale();
-    final transposed = inputSequence.map((chord) => chord == '\n' ? '\n' : transposeChord(chord, scale)).toList();
+    final transposed = inputSequence
+        .map((chord) => chord == '\n' ? '\n' : transposeChord(chord, scale))
+        .toList();
     setState(() {
       transposedResult = transposed.join(' ').replaceAll('\n ', '\n');
     });
@@ -138,222 +141,345 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
     );
   }
 
+  void _appendToTextField(String value) {
+    final currentText = _textController.text.trimRight();
+    final updated = currentText.isEmpty ? value : '$currentText $value';
+    setState(() {
+      _textController.text = updated;
+      _textController.selection =
+          TextSelection.fromPosition(TextPosition(offset: updated.length));
+      inputSequence = updated
+          .split(RegExp(r'(\s+|\n)'))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-              DropdownButtonFormField<String>(
-                value: notationType,
-                decoration: InputDecoration(labelText: loc.notation_type_label),
-                items: ['latina_option', 'american_option'].map((key) {
-                  return DropdownMenuItem(
-                    value: key,
-                    child: Text(loc.getTranslation(key)),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() {
-                  notationType = value!;
-                  selectedRootNote = '';
-                }),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: accidentalPreference,
-                decoration: InputDecoration(labelText: loc.accidental_preference_label),
-                items: ['sharp_option', 'flat_option'].map((key) {
-                  return DropdownMenuItem(
-                    value: key,
-                    child: Text(loc.getTranslation(key)),
-                  );
-                }).toList(),
-                onChanged: (value) => setState(() {
-                  accidentalPreference = value!;
-                  selectedRootNote = '';
-                }),
-              ),
-              const SizedBox(height: 16),
-              Text(loc.chord_complexity_label),
-              const SizedBox(height: 8),
-              ToggleButtons(
-                isSelected: List.generate(3, (i) => complexityLevel == i),
-                onPressed: (index) => setState(() {
-                  complexityLevel = index;
-                  if (index != 2) selectedRootNote = '';
-                }),
+    return AppScaffold(
+      title: loc.button_transpose_by_tone,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Notation dropdown
+            buildStyledDropdown(
+              value: notationType,
+              label: loc.notation_type_label,
+              items: ['latina_option', 'american_option'],
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() {
+                notationType = value!;
+                selectedRootNote = '';
+              }),
+            ),
+            const SizedBox(height: 12),
+
+            // Accidental dropdown
+            buildStyledDropdown(
+              value: accidentalPreference,
+              label: loc.accidental_preference_label,
+              items: ['sharp_option', 'flat_option'],
+              translateFn: (key) => loc.getTranslation(key),
+              onChanged: (value) => setState(() {
+                accidentalPreference = value!;
+                selectedRootNote = '';
+              }),
+            ),
+            const SizedBox(height: 20),
+
+            // Chord complexity
+            buildSectionLabel(loc.chord_complexity_label),
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF132035),
                 borderRadius: BorderRadius.circular(12),
-                selectedColor: Colors.white,
-                fillColor: Theme.of(context).colorScheme.primary,
-                color: Theme.of(context).colorScheme.primary,
-                children: complexityLabels.map((key) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Text(loc.getTranslation(key)),
-                )).toList(),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
               ),
-              if (complexityLevel == 2) ...[
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  value: selectedRootNote.isNotEmpty ? selectedRootNote : null,
-                  decoration: InputDecoration(labelText: loc.select_root_note_label),
-                  items: buildRootNoteDropdownItems().map((note) => DropdownMenuItem(value: note, child: Text(note))).toList(),
-                  onChanged: (value) => setState(() => selectedRootNote = value!),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Row(
+              child: Row(
+                children: List.generate(3, (i) {
+                  final isSelected = complexityLevel == i;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() {
+                        complexityLevel = i;
+                        if (i != 2) selectedRootNote = '';
+                      }),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? const Color(0xFFD4AF37)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(11),
+                        ),
+                        child: Text(
+                          loc.getTranslation(complexityLabels[i]),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: isSelected
+                                ? const Color(0xFF0A1628)
+                                : Colors.white70,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontFamily: 'Urbanist',
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            // Root note for advanced mode
+            if (complexityLevel == 2) ...[
+              const SizedBox(height: 12),
+              buildStyledDropdown(
+                value: selectedRootNote.isNotEmpty ? selectedRootNote : getRootNotes().first,
+                label: loc.select_root_note_label,
+                items: getRootNotes(),
+                translateFn: (key) => key,
+                onChanged: (value) => setState(() => selectedRootNote = value!),
+              ),
+            ],
+
+            const SizedBox(height: 20),
+
+            // Semitone shift
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF132035),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(loc.semitones_label),
+                  Text(
+                    loc.semitones_label,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                      fontFamily: 'Urbanist',
+                    ),
+                  ),
                   Row(
                     children: [
-                      IconButton(onPressed: () => setState(() => semitoneShift--), icon: const Icon(Icons.remove)),
-                      Text('$semitoneShift'),
-                      IconButton(onPressed: () => setState(() => semitoneShift++), icon: const Icon(Icons.add)),
+                      _buildSemitoneBtn(Icons.remove, () => setState(() => semitoneShift--)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          '$semitoneShift',
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFFD4AF37),
+                            fontFamily: 'Urbanist',
+                          ),
+                        ),
+                      ),
+                      _buildSemitoneBtn(Icons.add, () => setState(() => semitoneShift++)),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Text(loc.current_sequence_label, style: const TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _textController,
-                maxLines: null,
-                decoration: InputDecoration(
-                  hintText: loc.empty_sequence_placeholder,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Text input
+            buildSectionLabel(loc.current_sequence_label),
+            TextField(
+              controller: _textController,
+              maxLines: null,
+              minLines: 2,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: InputDecoration(
+                hintText: loc.empty_sequence_placeholder,
+                filled: true,
+                fillColor: const Color(0xFF0D1828),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
-                onChanged: (value) {
-                  setState(() {
-                    inputSequence = value.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
-                  });
-                },
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFD4AF37)),
+                ),
               ),
-              const SizedBox(height: 24),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: getDisplayedButtons().map((note) => CustomButton(
-                  text: note,
-                  onPressed: () {
-                    final currentText = _textController.text.trimRight();
-                    final updated = currentText.isEmpty ? note : '$currentText $note';
-                    setState(() {
-                      _textController.text = updated;
-                      _textController.selection = TextSelection.fromPosition(TextPosition(offset: updated.length));
-                      inputSequence = updated.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
-                    });
-                  },
-                )).toList(),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(child: CustomButton(
+              onChanged: (value) {
+                setState(() {
+                  inputSequence = value
+                      .split(RegExp(r'(\s+|\n)'))
+                      .where((s) => s.trim().isNotEmpty)
+                      .toList();
+                });
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            // Note/chord buttons
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: getDisplayedButtons()
+                  .map((note) => CustomButton(
+                        text: note,
+                        isSmall: true,
+                        onPressed: () => _appendToTextField(note),
+                      ))
+                  .toList(),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Action row
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
                     icon: Icons.keyboard_return,
                     text: loc.newline_button,
                     onPressed: () {
-                      final currentText = _textController.text;
-                      final updated = '$currentText\n';
+                      final current = _textController.text;
+                      final updated = '$current\n';
                       setState(() {
                         _textController.text = updated;
-                        _textController.selection = TextSelection.fromPosition(TextPosition(offset: updated.length));
-                        inputSequence = updated.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
+                        _textController.selection = TextSelection.fromPosition(
+                            TextPosition(offset: updated.length));
+                        inputSequence = updated
+                            .split(RegExp(r'(\s+|\n)'))
+                            .where((s) => s.trim().isNotEmpty)
+                            .toList();
                       });
                     },
-                  )),
-                  const SizedBox(width: 12),
-                  Expanded(child: CustomButton(text: loc.transpose_button, onPressed: transposeSequence)),
-                ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomButton(
+                    text: loc.transpose_button,
+                    isPrimary: true,
+                    onPressed: transposeSequence,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.backspace_outlined,
+                    text: loc.clear_last_button,
+                    onPressed: clearLast,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.refresh,
+                    text: loc.reset_button,
+                    onPressed: clearAll,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Transposed result
+            if (transposedResult.isNotEmpty) ...[
+              buildSectionLabel(loc.transposed_result_label),
+              buildPreviewContainer(
+                repaintKey: _previewContainerKey,
+                text: transposedResult,
+                placeholder: loc.empty_sequence_placeholder,
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: CustomButton(icon: Icons.backspace, text: loc.clear_last_button, onPressed: clearLast)),
+                  Expanded(
+                    child: CustomButton(
+                      icon: Icons.copy,
+                      text: loc.copy_button,
+                      onPressed: copyToClipboard,
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: CustomButton(icon: Icons.refresh, text: loc.reset_button, onPressed: clearAll)),
+                  Expanded(
+                    child: CustomButton(
+                      icon: Icons.ios_share_rounded,
+                      text: loc.export_button,
+                      onPressed: () async {
+                        await showExportBottomSheet(
+                          context: context,
+                          pdfLabel: loc.export_pdf_option,
+                          imageLabel: loc.export_image_option,
+                          onExportPdf: () async {
+                            Navigator.pop(context);
+                            final title = await promptForPdfTitle(
+                                context, loc.export_pdf_title);
+                            if (title != null && title.isNotEmpty) {
+                              ExportHelper.exportAsPdf(
+                                title: title,
+                                content: transposedResult,
+                                filename: 'transposicion.pdf',
+                              );
+                            }
+                          },
+                          onExportImage: () {
+                            Navigator.pop(context);
+                            ExportHelper.exportAsImage(
+                              context: context,
+                              repaintKey: _previewContainerKey,
+                              filename: 'transposicion.png',
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 24),
-              if (transposedResult.isNotEmpty) ...[
-                Text(loc.transposed_result_label, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                RepaintBoundary(
-                  key: _previewContainerKey,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
-                    ),
-                    child: Text(transposedResult, style: const TextStyle(fontSize: 16, color: Colors.black)),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(child: CustomButton(icon: Icons.copy, text: loc.copy_button, onPressed: copyToClipboard)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomButton(
-                        icon: Icons.share,
-                        text: loc.export_button,
-                        onPressed: () async {
-                          await showModalBottomSheet(
-                            context: context,
-                            builder: (_) => Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.picture_as_pdf),
-                                  title: Text(loc.export_pdf_option),
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    final title = await promptForPdfTitle(context, loc.export_pdf_title);
-                                    if (title != null && title.isNotEmpty) {
-                                      ExportHelper.exportAsPdf(title: title, content: transposedResult, filename: 'transposicion.pdf');
-                                    }
-                                  },
-                                ),
-                                ListTile(
-                                  leading: const Icon(Icons.image),
-                                  title: Text(loc.export_image_option),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    ExportHelper.exportAsImage(context: context, repaintKey: _previewContainerKey, filename: 'transposicion.png');
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-              ],
             ],
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSemitoneBtn(IconData icon, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A2C42),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: const Color(0xFFD4AF37).withOpacity(0.2),
+            ),
           ),
+          child: Icon(icon, color: const Color(0xFFD4AF37), size: 20),
         ),
       ),
     );
   }
 }
-

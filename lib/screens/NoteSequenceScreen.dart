@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../utils/dialog_helpers.dart';
 import '../utils/localization_helper.dart';
+import '../widgets/app_scaffold.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/export_helper.dart';
 
@@ -34,17 +35,17 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
 
   String normalizeSymbol(String input) {
     return input
-        .replaceAll('–', '-')   // guion largo a guion normal
-        .replaceAll('—', '-')   // em dash a guion normal
-        .replaceAll('−', '-')   // signo menos matemático a guion
-        .replaceAll('（', '(')  // paréntesis chino a normal
-        .replaceAll('）', ')')  // paréntesis chino a normal
-        .replaceAll('，', ',')  // coma china a normal
-        .replaceAll('／', '/')  // slash japonés a normal
-        .replaceAll('‘', '\'')  // comillas curvas a rectas
-        .replaceAll('’', '\'')  // comillas curvas a rectas
-        .replaceAll('“', '"')   // comillas curvas a rectas
-        .replaceAll('”', '"');  // comillas curvas a rectas
+        .replaceAll('–', '-')
+        .replaceAll('—', '-')
+        .replaceAll('−', '-')
+        .replaceAll('（', '(')
+        .replaceAll('）', ')')
+        .replaceAll('，', ',')
+        .replaceAll('／', '/')
+        .replaceAll('\u2018', '\'')
+        .replaceAll('\u2019', '\'')
+        .replaceAll('\u201C', '"')
+        .replaceAll('\u201D', '"');
   }
 
   List<String> sequence = [];
@@ -95,16 +96,22 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
     final updated = '$current\n';
     setState(() {
       _textController.text = updated;
-      _textController.selection = TextSelection.fromPosition(TextPosition(offset: updated.length));
-      sequence = updated.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
+      _textController.selection =
+          TextSelection.fromPosition(TextPosition(offset: updated.length));
+      sequence = updated
+          .split(RegExp(r'(\s+|\n)'))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
     });
   }
+
   void _clearLast() {
     if (sequence.isNotEmpty) {
       setState(() {
         sequence.removeLast();
         _textController.text = sequence.join(' ');
-        _textController.selection = TextSelection.fromPosition(TextPosition(offset: _textController.text.length));
+        _textController.selection = TextSelection.fromPosition(
+            TextPosition(offset: _textController.text.length));
       });
     }
   }
@@ -119,18 +126,34 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
 
       if (allowedSymbols.contains(cleanNote)) return cleanNote;
 
-      final idx = inputNotes.indexWhere((n) => n.toLowerCase() == cleanNote.toLowerCase());
+      final idx = inputNotes
+          .indexWhere((n) => n.toLowerCase() == cleanNote.toLowerCase());
       if (idx == -1) return '?';
 
-      final newIndex = (idx + offset) % 12;
+      final newIndex = ((idx + offset) % 12 + 12) % 12;
       return outputNotes[newIndex];
     }).toList();
 
     setState(() {
       transposedResult = transposed
-          .map((note) => [',', '/', '(', ')', '\n'].contains(note) ? note : '$note ')
+          .map((note) =>
+              [',', '/', '(', ')', '\n'].contains(note) ? note : '$note ')
           .join()
           .replaceAll('\n ', '\n');
+    });
+  }
+
+  void _appendToTextField(String value) {
+    final current = _textController.text.trimRight();
+    final updated = current.isEmpty ? value : '$current $value';
+    setState(() {
+      _textController.text = updated;
+      _textController.selection =
+          TextSelection.fromPosition(TextPosition(offset: updated.length));
+      sequence = updated
+          .split(RegExp(r'(\s+|\n)'))
+          .where((s) => s.trim().isNotEmpty)
+          .toList();
     });
   }
 
@@ -138,181 +161,260 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;
 
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(icon: const Icon(Icons.arrow_back), onPressed: () => Navigator.pop(context)),
-              Text(loc.current_sequence_label, style: const TextStyle(fontSize: 16)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _textController,
-                maxLines: null,
-                decoration: InputDecoration(
-                  hintText: loc.empty_sequence_placeholder,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+    return AppScaffold(
+      title: loc.button_transpose_between_instruments,
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Info card
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF132035),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withOpacity(0.08)),
+              ),
+              child: Row(
+                children: [
+                  _buildInstrumentPill(
+                      loc.getTranslation(widget.originInstrument)),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Icon(Icons.arrow_forward,
+                        color: const Color(0xFFD4AF37).withOpacity(0.7),
+                        size: 20),
+                  ),
+                  _buildInstrumentPill(
+                      loc.getTranslation(widget.targetInstrument)),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Text input
+            buildSectionLabel(loc.current_sequence_label),
+            TextField(
+              controller: _textController,
+              maxLines: null,
+              minLines: 2,
+              style: const TextStyle(color: Colors.white, fontSize: 16),
+              decoration: InputDecoration(
+                hintText: loc.empty_sequence_placeholder,
+                filled: true,
+                fillColor: const Color(0xFF0D1828),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
                 ),
-                style: const TextStyle(fontSize: 18),
-                onChanged: (value) {
-                  setState(() {
-                    sequence = value
-                        .split(RegExp(r'(?=[,\/\-\(\)\n])|(?<=[,\/\-\(\)\n])|\s+'))
-                        .where((s) => s.trim().isNotEmpty)
-                        .toList();
-                  });
-                },
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.white.withOpacity(0.1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFD4AF37)),
+                ),
               ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: inputNotes.map((note) => CustomButton(
-                  text: note,
-                  onPressed: () {
-                    final current = _textController.text.trimRight();
-                    final updated = current.isEmpty ? note : '$current $note';
-                    setState(() {
-                      _textController.text = updated;
-                      _textController.selection = TextSelection.fromPosition(TextPosition(offset: updated.length));
-                      sequence = updated.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
-                    });
-                  },
-                )).toList(),
+              onChanged: (value) {
+                setState(() {
+                  sequence = value
+                      .split(
+                          RegExp(r'(?=[,\/\-\(\)\n])|(?<=[,\/\-\(\)\n])|\s+'))
+                      .where((s) => s.trim().isNotEmpty)
+                      .toList();
+                });
+              },
+            ),
+
+            const SizedBox(height: 16),
+
+            // Note buttons
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: inputNotes
+                  .map((note) => CustomButton(
+                        text: note,
+                        isSmall: true,
+                        onPressed: () => _appendToTextField(note),
+                      ))
+                  .toList(),
+            ),
+            const SizedBox(height: 12),
+
+            // Symbol buttons
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [',', '/', '-', '(', ')']
+                  .map((symbol) => CustomButton(
+                        text: symbol,
+                        isSmall: true,
+                        onPressed: () => _appendToTextField(symbol),
+                      ))
+                  .toList(),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Control row
+            Row(
+              children: [
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.keyboard_return,
+                    text: loc.newline_button,
+                    onPressed: _addLineBreak,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: CustomButton(
+                    icon: Icons.backspace_outlined,
+                    text: loc.clear_last_button,
+                    onPressed: _clearLast,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Transpose button
+            SizedBox(
+              width: double.infinity,
+              child: CustomButton(
+                text: loc.transpose_button,
+                isPrimary: true,
+                icon: Icons.swap_horiz_rounded,
+                onPressed: _transpose,
               ),
-              const SizedBox(height: 12),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [',', '/', '-', '(', ')'].map((symbol) => CustomButton(
-                  text: symbol,
-                  onPressed: () {
-                    final current = _textController.text.trimRight();
-                    final updated = current.isEmpty ? symbol : '$current $symbol';
-                    setState(() {
-                      _textController.text = updated;
-                      _textController.selection = TextSelection.fromPosition(TextPosition(offset: updated.length));
-                      sequence = updated.split(RegExp(r'(\s+|\n)')).where((s) => s.trim().isNotEmpty).toList();
-                    });
-                  },
-                )).toList(),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Result
+            if (transposedResult.isNotEmpty) ...[
+              buildSectionLabel(loc.transposed_result_label),
+              buildPreviewContainer(
+                repaintKey: _previewContainerKey,
+                text: transposedResult,
+                placeholder: loc.empty_sequence_placeholder,
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: CustomButton(icon: Icons.keyboard_return, text: loc.newline_button, onPressed: _addLineBreak)),
+                  Expanded(
+                    child: CustomButton(
+                      icon: Icons.copy,
+                      text: loc.copy_button,
+                      onPressed: () {
+                        Clipboard.setData(
+                            ClipboardData(text: transposedResult));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(loc.copied_snackbar)),
+                        );
+                      },
+                    ),
+                  ),
                   const SizedBox(width: 12),
-                  Expanded(child: CustomButton(icon: Icons.backspace, text: loc.clear_last_button, onPressed: _clearLast)),
+                  Expanded(
+                    child: CustomButton(
+                      icon: Icons.ios_share_rounded,
+                      text: loc.export_button,
+                      onPressed: () async {
+                        await showExportBottomSheet(
+                          context: context,
+                          pdfLabel: loc.export_pdf_option,
+                          imageLabel: loc.export_image_option,
+                          onExportPdf: () async {
+                            Navigator.pop(context);
+                            final title = await promptForPdfTitle(
+                                context, loc.note_sequence_pdf_title);
+                            if (title != null && title.isNotEmpty) {
+                              ExportHelper.exportNoteSequenceAsPdf(
+                                title: title,
+                                originInstrument: loc.getTranslation(
+                                    widget.originInstrument),
+                                targetInstrument: loc.getTranslation(
+                                    widget.targetInstrument),
+                                notationInput:
+                                    loc.getTranslation(widget.notationInput),
+                                notationOutput:
+                                    loc.getTranslation(widget.notationOutput),
+                                accidentalPreference: loc.getTranslation(
+                                    widget.accidentalPreference),
+                                content: transposedResult,
+                                filename: 'transposicion_notas.pdf',
+                                labelFrom: loc.pdf_label_from,
+                                labelTo: loc.pdf_label_to,
+                                labelNotation: loc.pdf_label_notation,
+                                labelAccidentals: loc.pdf_label_accidentals,
+                              );
+                            }
+                          },
+                          onExportImage: () {
+                            Navigator.pop(context);
+                            ExportHelper.exportAsImage(
+                              context: context,
+                              repaintKey: _previewContainerKey,
+                              filename: 'transposicion.png',
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 20),
-              CustomButton(text: loc.transpose_button, onPressed: _transpose),
-              const SizedBox(height: 20),
-              if (transposedResult.isNotEmpty) ...[
-                Text(loc.transposed_result_label, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 8),
-                RepaintBoundary(
-                  key: _previewContainerKey,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8),
-                      color: Colors.white,
-                    ),
-                    child: Text(transposedResult, style: const TextStyle(fontSize: 18, color: Colors.black)),
-                  ),
+              const SizedBox(height: 16),
+              Center(
+                child: TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      sequence.clear();
+                      transposedResult = '';
+                      _textController.clear();
+                    });
+                  },
+                  icon: const Icon(Icons.refresh, color: Color(0xFFD4AF37)),
+                  label: Text(loc.reset_all_button,
+                      style: const TextStyle(color: Color(0xFFD4AF37))),
                 ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: CustomButton(
-                        icon: Icons.copy,
-                        text: loc.copy_button,
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: transposedResult));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(loc.copied_snackbar)),
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: CustomButton(
-                        icon: Icons.share,
-                        text: loc.export_button,
-                        onPressed: () async {
-                          await showModalBottomSheet(
-                            context: context,
-                            builder: (_) => Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                ListTile(
-                                  leading: const Icon(Icons.picture_as_pdf),
-                                  title: Text(loc.export_pdf_option),
-                                  onTap: () async {
-                                    Navigator.pop(context);
-                                    final title = await promptForPdfTitle(context, loc.note_sequence_pdf_title);
-                                    if (title != null && title.isNotEmpty) {
-                                      ExportHelper.exportNoteSequenceAsPdf(
-                                        title: title,
-                                        originInstrument: loc.getTranslation(widget.originInstrument),
-                                        targetInstrument: loc.getTranslation(widget.targetInstrument),
-                                        notationInput: loc.getTranslation(widget.notationInput),
-                                        notationOutput: loc.getTranslation(widget.notationOutput),
-                                        accidentalPreference: loc.getTranslation(widget.accidentalPreference),
-                                        content: transposedResult,
-                                        filename: 'transposicion_notas.pdf',
-                                        labelFrom: loc.pdf_label_from,
-                                        labelTo: loc.pdf_label_to,
-                                        labelNotation: loc.pdf_label_notation,
-                                        labelAccidentals: loc.pdf_label_accidentals,
-                                      );
-                                    }
-                                  },
-                                ),
-                                ListTile(
-                                  leading: const Icon(Icons.image),
-                                  title: Text(loc.export_image_option),
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    ExportHelper.exportAsImage(
-                                      context: context,
-                                      repaintKey: _previewContainerKey,
-                                      filename: 'transposicion.png',
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 24),
-                Center(
-                  child: TextButton.icon(
-                    onPressed: () {
-                      setState(() {
-                        sequence.clear();
-                        transposedResult = '';
-                        _textController.clear();
-                      });
-                    },
-                    icon: const Icon(Icons.refresh),
-                    label: Text(loc.reset_all_button),
-                  ),
-                ),
-              ]
+              ),
             ],
+
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInstrumentPill(String label) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1A2C42),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: const Color(0xFFD4AF37).withOpacity(0.2),
           ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Urbanist',
+          ),
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
