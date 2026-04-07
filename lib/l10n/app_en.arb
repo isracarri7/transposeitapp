@@ -120,5 +120,16 @@
     }
   },
   "camera_source": "camera",
-  "gallery_source": "gallery"
+  "gallery_source": "gallery",
+
+  "button_convert_notation": "Convert notation",
+  "menu_subtitle_convert": "Latin ↔ American",
+  "converter_input_label": "Input notes:",
+  "converter_input_hint": "Enter notes to convert...",
+  "converter_result_label": "Converted result:",
+  "converter_convert_button": "Convert",
+  "converter_paste_button": "Paste from clipboard",
+  "converter_pdf_title": "Notation Conversion",
+  "input_mode_keyboard": "Note keys",
+  "input_mode_text": "Text input"
 }

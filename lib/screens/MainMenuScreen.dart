@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../widgets/app_scaffold.dart';
 import 'NoteDraftScreen.dart';
+import 'NotationConverterScreen.dart';
 import 'TransposeByTone.dart';
 import 'InstrumentSelectionScreen.dart';
 
@@ -127,6 +128,17 @@ class MainMenuScreen extends StatelessWidget {
                     context,
                     SmoothPageRoute(
                         page: const InstrumentSelectionScreen()),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildMenuButton(
+                  icon: Icons.translate_rounded,
+                  label: loc.button_convert_notation,
+                  subtitle: loc.menu_subtitle_convert,
+                  onTap: () => Navigator.push(
+                    context,
+                    SmoothPageRoute(
+                        page: const NotationConverterScreen()),
                   ),
                 ),
                 const SizedBox(height: 12),
