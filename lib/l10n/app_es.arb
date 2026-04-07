@@ -120,5 +120,16 @@
     }
   },
   "camera_source": "c\u00e1mara",
-  "gallery_source": "galer\u00eda"
+  "gallery_source": "galer\u00eda",
+
+  "button_convert_notation": "Convertir notaci\u00f3n",
+  "menu_subtitle_convert": "Latina \u2194 Americana",
+  "converter_input_label": "Notas de entrada:",
+  "converter_input_hint": "Ingresa notas para convertir...",
+  "converter_result_label": "Resultado convertido:",
+  "converter_convert_button": "Convertir",
+  "converter_paste_button": "Pegar del portapapeles",
+  "converter_pdf_title": "Conversi\u00f3n de Notaci\u00f3n",
+  "input_mode_keyboard": "Teclas",
+  "input_mode_text": "Texto libre"
 }
