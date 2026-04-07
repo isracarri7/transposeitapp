@@ -96,12 +96,23 @@ class _TransposeByToneScreenState extends State<TransposeByToneScreen> {
   }
 
   String transposeChord(String chord, List<String> scale) {
+    // Strip non-letter prefix (e.g. "//G" → prefix="//" body="G")
+    int prefixEnd = 0;
+    while (prefixEnd < chord.length &&
+        !RegExp(r'[a-zA-Z]').hasMatch(chord[prefixEnd])) {
+      prefixEnd++;
+    }
+    if (prefixEnd == chord.length) return chord; // no musical content
+
+    final prefix = chord.substring(0, prefixEnd);
+    final body = chord.substring(prefixEnd);
+
     final sortedScale = [...scale]..sort((a, b) => b.length.compareTo(a.length));
     for (var note in sortedScale) {
-      if (chord.startsWith(note)) {
+      if (body.startsWith(note)) {
         final originalIndex = scale.indexOf(note);
         final newIndex = ((originalIndex + semitoneShift) % 12 + 12) % 12;
-        return chord.replaceFirst(note, scale[newIndex]);
+        return prefix + body.replaceFirst(note, scale[newIndex]);
       }
     }
     return chord;

@@ -118,20 +118,37 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
 
   void _transpose() {
     final offset = getOffset();
-    final transposed = sequence.map((note) {
-      if (note == '\n') return '\n';
+    final sortedInput = [...inputNotes]
+      ..sort((a, b) => b.length.compareTo(a.length));
 
-      final cleanNote = normalizeSymbol(note);
+    final transposed = sequence.map((token) {
+      if (token == '\n') return '\n';
+
+      final cleanToken = normalizeSymbol(token);
       final allowedSymbols = [',', '/', '-', '(', ')'];
 
-      if (allowedSymbols.contains(cleanNote)) return cleanNote;
+      if (allowedSymbols.contains(cleanToken)) return cleanToken;
 
-      final idx = inputNotes
-          .indexWhere((n) => n.toLowerCase() == cleanNote.toLowerCase());
-      if (idx == -1) return '?';
+      // Strip non-letter prefix (e.g. "//G" → prefix="//" body="G")
+      int prefixEnd = 0;
+      while (prefixEnd < cleanToken.length &&
+          !RegExp(r'[a-zA-Z]').hasMatch(cleanToken[prefixEnd])) {
+        prefixEnd++;
+      }
+      if (prefixEnd == cleanToken.length) return cleanToken;
 
-      final newIndex = ((idx + offset) % 12 + 12) % 12;
-      return outputNotes[newIndex];
+      final prefix = cleanToken.substring(0, prefixEnd);
+      final body = cleanToken.substring(prefixEnd);
+
+      for (var note in sortedInput) {
+        if (body.toLowerCase().startsWith(note.toLowerCase())) {
+          final idx = inputNotes.indexOf(note);
+          final newIndex = ((idx + offset) % 12 + 12) % 12;
+          final suffix = body.substring(note.length);
+          return prefix + outputNotes[newIndex] + suffix;
+        }
+      }
+      return token;
     }).toList();
 
     setState(() {
