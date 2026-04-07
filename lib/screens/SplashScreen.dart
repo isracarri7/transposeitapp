@@ -203,9 +203,9 @@ class _SplashScreenState extends State<SplashScreen>
                 position: _textSlide,
                 child: FadeTransition(
                   opacity: _textFade,
-                  child: const Column(
+                  child: Column(
                     children: [
-                      Text(
+                      const Text(
                         'Transpose-it',
                         style: TextStyle(
                           fontSize: 34,
@@ -215,10 +215,12 @@ class _SplashScreenState extends State<SplashScreen>
                           letterSpacing: 2.0,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
-                        'Your music, any key',
-                        style: TextStyle(
+                        Localizations.localeOf(context).languageCode == 'es'
+                            ? 'Tu música, en cualquier tono'
+                            : 'Your music, any key',
+                        style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w400,
                           color: Color(0xFFD4AF37),

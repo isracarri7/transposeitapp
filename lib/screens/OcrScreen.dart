@@ -48,12 +48,31 @@ class _OcrScreenState extends State<OcrScreen> {
 
   Future<void> _pickImage(ImageSource source) async {
     try {
-      final XFile? picked = await _picker.pickImage(
-        source: source,
-        maxWidth: 2400,
-        maxHeight: 2400,
-        imageQuality: 92,
-      );
+      XFile? picked;
+      try {
+        picked = await _picker.pickImage(
+          source: source,
+          maxWidth: 2400,
+          maxHeight: 2400,
+          imageQuality: 92,
+        );
+      } on PlatformException catch (e) {
+        // Camera permission denied or other platform error
+        if (!mounted) return;
+        final loc = AppLocalizations.of(context)!;
+        setState(() {
+          _state = OcrState.error;
+          _errorMessage = e.code == 'camera_access_denied'
+              ? loc.camera_permission_denied
+              : loc.source_open_error(
+                  source == ImageSource.camera
+                      ? loc.camera_source
+                      : loc.gallery_source,
+                  e.message ?? '',
+                );
+        });
+        return;
+      }
 
       // Guard: user cancelled or widget disposed while camera was open
       if (picked == null) return;

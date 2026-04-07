@@ -118,20 +118,37 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
 
   void _transpose() {
     final offset = getOffset();
-    final transposed = sequence.map((note) {
-      if (note == '\n') return '\n';
+    final sortedInput = [...inputNotes]
+      ..sort((a, b) => b.length.compareTo(a.length));
 
-      final cleanNote = normalizeSymbol(note);
+    final transposed = sequence.map((token) {
+      if (token == '\n') return '\n';
+
+      final cleanToken = normalizeSymbol(token);
       final allowedSymbols = [',', '/', '-', '(', ')'];
 
-      if (allowedSymbols.contains(cleanNote)) return cleanNote;
+      if (allowedSymbols.contains(cleanToken)) return cleanToken;
 
-      final idx = inputNotes
-          .indexWhere((n) => n.toLowerCase() == cleanNote.toLowerCase());
-      if (idx == -1) return '?';
+      // Strip non-letter prefix (e.g. "//G" → prefix="//" body="G")
+      int prefixEnd = 0;
+      while (prefixEnd < cleanToken.length &&
+          !RegExp(r'[a-zA-Z]').hasMatch(cleanToken[prefixEnd])) {
+        prefixEnd++;
+      }
+      if (prefixEnd == cleanToken.length) return cleanToken;
 
-      final newIndex = ((idx + offset) % 12 + 12) % 12;
-      return outputNotes[newIndex];
+      final prefix = cleanToken.substring(0, prefixEnd);
+      final body = cleanToken.substring(prefixEnd);
+
+      for (var note in sortedInput) {
+        if (body.toLowerCase().startsWith(note.toLowerCase())) {
+          final idx = inputNotes.indexOf(note);
+          final newIndex = ((idx + offset) % 12 + 12) % 12;
+          final suffix = body.substring(note.length);
+          return prefix + outputNotes[newIndex] + suffix;
+        }
+      }
+      return token;
     }).toList();
 
     setState(() {
@@ -173,8 +190,8 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
                 color: const Color(0xFF132035),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withOpacity(0.08)),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.white.withOpacity(0.06)),
               ),
               child: Row(
                 children: [
@@ -182,9 +199,15 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
                       loc.getTranslation(widget.originInstrument)),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
-                    child: Icon(Icons.arrow_forward,
-                        color: const Color(0xFFD4AF37).withOpacity(0.7),
-                        size: 20),
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFD4AF37).withOpacity(0.12),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.arrow_forward,
+                          color: Color(0xFFD4AF37), size: 16),
+                    ),
                   ),
                   _buildInstrumentPill(
                       loc.getTranslation(widget.targetInstrument)),
@@ -397,12 +420,12 @@ class _NoteSequenceScreenState extends State<NoteSequenceScreen> {
   Widget _buildInstrumentPill(String label) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         decoration: BoxDecoration(
           color: const Color(0xFF1A2C42),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: const Color(0xFFD4AF37).withOpacity(0.2),
+            color: const Color(0xFFD4AF37).withOpacity(0.15),
           ),
         ),
         child: Text(

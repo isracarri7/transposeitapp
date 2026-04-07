@@ -105,5 +105,20 @@
   "ocr_new_scan_camera": "Nuevo escaneo",
   "ocr_new_scan_gallery": "Desde galer\u00eda",
   "ocr_banner_title": "Escanear con c\u00e1mara",
-  "ocr_banner_subtitle": "Extrae notas de una foto de tu partitura"
+  "ocr_banner_subtitle": "Extrae notas de una foto de tu partitura",
+
+  "tagline": "Tu m\u00fasica, en cualquier tono",
+  "menu_subtitle_tone": "Semitonos y acordes",
+  "menu_subtitle_instruments": "Piano, Sax, Trompeta...",
+  "menu_subtitle_digitalize": "Entrada manual y OCR",
+  "camera_permission_denied": "Permiso de c\u00e1mara denegado. Habil\u00edtalo en los Ajustes de tu dispositivo.",
+  "source_open_error": "No se pudo abrir {source}: {message}",
+  "@source_open_error": {
+    "placeholders": {
+      "source": { "type": "String" },
+      "message": { "type": "String" }
+    }
+  },
+  "camera_source": "c\u00e1mara",
+  "gallery_source": "galer\u00eda"
 }

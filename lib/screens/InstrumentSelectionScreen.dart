@@ -139,8 +139,8 @@ class _InstrumentSelectionScreenState extends State<InstrumentSelectionScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => NoteInputScreen(
+                        SmoothPageRoute(
+                          page: NoteInputScreen(
                             originInstrument: originInstrument!,
                             targetInstrument: targetInstrument!,
                             notationInput: notationInput,
@@ -160,8 +160,8 @@ class _InstrumentSelectionScreenState extends State<InstrumentSelectionScreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => NoteSequenceScreen(
+                        SmoothPageRoute(
+                          page: NoteSequenceScreen(
                             originInstrument: originInstrument!,
                             targetInstrument: targetInstrument!,
                             notationInput: notationInput,
