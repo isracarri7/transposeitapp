@@ -141,9 +141,9 @@ class NoteInputScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _buildResultNoteChip(original, false),
+                Flexible(child: _buildResultNoteChip(original, false)),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -151,10 +151,10 @@ class NoteInputScreen extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.arrow_forward_rounded,
-                        color: Color(0xFFD4AF37), size: 22),
+                        color: Color(0xFFD4AF37), size: 20),
                   ),
                 ),
-                _buildResultNoteChip(transposed, true),
+                Flexible(child: _buildResultNoteChip(transposed, true)),
               ],
             ),
             const SizedBox(height: 8),
@@ -191,7 +191,7 @@ class NoteInputScreen extends StatelessWidget {
 
   Widget _buildResultNoteChip(String note, bool isPrimary) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       decoration: BoxDecoration(
         color: isPrimary
             ? const Color(0xFFD4AF37).withOpacity(0.12)
@@ -213,13 +213,16 @@ class NoteInputScreen extends StatelessWidget {
               ]
             : null,
       ),
-      child: Text(
-        note,
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.w700,
-          color: isPrimary ? const Color(0xFFD4AF37) : Colors.white,
-          fontFamily: 'Urbanist',
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          note,
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.w700,
+            color: isPrimary ? const Color(0xFFD4AF37) : Colors.white,
+            fontFamily: 'Urbanist',
+          ),
         ),
       ),
     );
