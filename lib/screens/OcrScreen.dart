@@ -130,6 +130,52 @@ class _OcrScreenState extends State<OcrScreen> {
     }
   }
 
+  /// Post-process OCR text to fix common misrecognitions in musical context.
+  ///
+  /// ML Kit frequently confuses visually similar characters:
+  ///   | (pipe), I (capital i), l (lowercase L) ↔ / (slash)
+  ///
+  /// In musical notation none of these are valid notes, so we can safely
+  /// correct them when they appear next to slashes or as standalone tokens.
+  String _postProcessMusicalOcr(String rawText) {
+    var text = rawText;
+
+    // 1. Pipe | → / (very common OCR confusion with slash)
+    text = text.replaceAll('|', '/');
+
+    // 2. Capital I adjacent to / → // (repeat sign)
+    //    "I/C" → "//C",  "AI/" → "A//"
+    text = text.replaceAll('I/', '//');
+    text = text.replaceAll('/I', '//');
+
+    // 3. Lowercase l adjacent to / → //
+    //    "l/C" → "//C",  "Al/" → "A//"
+    text = text.replaceAll('l/', '//');
+    text = text.replaceAll('/l', '//');
+
+    // 4. Standalone I or l between spaces → / (likely a slash)
+    //    "C I D" → "C / D" (but "Mi" stays "Mi" — I is inside a word)
+    text = text.replaceAllMapped(
+      RegExp(r'(?<=\s)[Il](?=\s)'),
+      (_) => '/',
+    );
+
+    // 5. I or l at very start/end of text next to space → /
+    text = text.replaceAllMapped(
+      RegExp(r'^[Il](?=\s)'),
+      (_) => '/',
+    );
+    text = text.replaceAllMapped(
+      RegExp(r'(?<=\s)[Il]$'),
+      (_) => '/',
+    );
+
+    // 6. Collapse triple+ slashes from over-correction → //
+    text = text.replaceAll(RegExp(r'/{3,}'), '//');
+
+    return text;
+  }
+
   Future<void> _extractText(String path) async {
     if (!mounted) return;
     setState(() => _state = OcrState.processing);
@@ -153,12 +199,15 @@ class _OcrScreenState extends State<OcrScreen> {
         }
       }
 
+      // Apply musical post-processing to fix common OCR confusions
+      final processedText = _postProcessMusicalOcr(recognized.text);
+
       setState(() {
-        _resultController.text = recognized.text;
+        _resultController.text = processedText;
         _confidence = elementCount > 0 ? totalConfidence / elementCount : 0;
         _blockCount = recognized.blocks.length;
-        _state = recognized.text.isEmpty ? OcrState.error : OcrState.done;
-        if (recognized.text.isEmpty) {
+        _state = processedText.isEmpty ? OcrState.error : OcrState.done;
+        if (processedText.isEmpty) {
           _errorMessage = AppLocalizations.of(context)!.ocr_no_text_found;
         }
       });
